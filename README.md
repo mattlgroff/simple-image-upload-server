@@ -1,4 +1,4 @@
-# Bun Image Upload Server
+# Simple Image Upload Server
 
 This server allows for the uploading of images and serves static files using Bun, a fast all-in-one JavaScript runtime. It is intended to be used for OpenAI GPT Vision's image upload feature, but it can be used for any other purpose as well. It deletes images older than 5 minutes to ensure that the server does not run out of disk space, whenever a new upload request comes in. It also rejects files that are larger than 20MB, as that is the maximum file size that OpenAI GPT Vision supports. 
 
