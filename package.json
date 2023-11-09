@@ -1,0 +1,5 @@
+{
+  "name": "bun-image-upload-server",
+  "module": "index.js",
+  "type": "module"
+}
