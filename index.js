@@ -82,7 +82,7 @@ Bun.serve({
     port: process.env.PORT || 3000,
     async fetch(req) {
         // Handle file upload requests
-        if (req.method === 'POST' && new URL(req.url).pathname === '/upload') {
+        if ((req.method === 'POST' || req.method === 'OPTIONS') && new URL(req.url).pathname === '/upload') {
             return handleFileUpload(req);
         }
 
