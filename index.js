@@ -13,39 +13,31 @@ function uuid() {
     );
 }
 
-// Function to delete files older than 5 minutes, excluding .keep files
-async function deleteOldFiles() {
-    const files = await fs.readdir(BASE_PATH);
-    const now = Date.now();
-    for (const file of files) {
-        // Skip deleting the .keep file
-        if (file === '.keep') continue;
-
-        try {
-            const { mtime } = await fs.stat(`${BASE_PATH}/${file}`);
-            if (now - mtime.getTime() > 5 * 60 * 1000) {
-                // 5 minutes in milliseconds
-                console.log('Deleting file older that 5 minutes:', file);
-                await fs.unlink(`${BASE_PATH}/${file}`);
-            }
-        } catch (error) {
-            // Handle errors (e.g., file doesn't exist anymore) if necessary
-            console.error(`Error deleting file ${file}:`, error.message);
-        }
-    }
-}
-
 // Function to handle file uploads
 async function handleFileUpload(req) {
     try {
         if (!req.headers.get('Authorization') || req.headers.get('Authorization') !== `Bearer ${API_KEY}`) {
             console.log('Unauthorized');
-            return new Response('Unauthorized, missing Bearer API_KEY or incorrect value', { status: 401 });
+            return new Response('Unauthorized, missing Bearer API_KEY or incorrect value', {
+                status: 401,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                },
+            });
         }
 
         if (req.headers.get('Content-Length') > MAX_FILE_SIZE) {
             console.log('File too large');
-            return new Response('File too large, max file size is 20MB', { status: 413 });
+            return new Response('File too large, max file size is 20MB', {
+                status: 413,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                },
+            });
         }
 
         const formData = await req.formData();
@@ -53,7 +45,14 @@ async function handleFileUpload(req) {
 
         if (!file || !SUPPORTED_TYPES.has(file.type)) {
             console.log('Unsupported file type:', file.type);
-            return new Response('Unsupported file type, must be png, jpg, jpeg, or gif', { status: 400 });
+            return new Response('Unsupported file type, must be png, jpg, jpeg, or gif', {
+                status: 400,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                },
+            });
         }
 
         // newFilename is uuid + file extension
@@ -71,6 +70,9 @@ async function handleFileUpload(req) {
                 status: 200,
                 headers: {
                     'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type',
                 },
             }
         );
@@ -85,10 +87,6 @@ Bun.serve({
     async fetch(req) {
         // Handle file upload requests
         if (req.method === 'POST' && new URL(req.url).pathname === '/upload') {
-            // Delete old files every time a new upload request is made
-            deleteOldFiles();
-
-            // Handle file upload
             return handleFileUpload(req);
         }
 
@@ -99,11 +97,25 @@ Bun.serve({
             const fileData = await fs.stat(filePath);
 
             if (!fileData) {
-                return new Response(null, { status: 404 });
+                return new Response(null, {
+                    status: 404,
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                    },
+                });
             }
 
             const file = Bun.file(filePath);
-            return new Response(file);
+            return new Response(file, {
+                status: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                },
+            });
         }
     },
     error() {
