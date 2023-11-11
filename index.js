@@ -78,11 +78,28 @@ async function handleFileUpload(req) {
     }
 }
 
+// Function to handle OPTIONS request for CORS preflight
+function handleOptionsRequest() {
+    return new Response(null, {
+        status: 204, // No Content
+        headers: {
+            'Access-Control-Allow-Origin': '*', // Allow all origins
+            'Access-Control-Allow-Methods': 'POST, GET, OPTIONS', // Allowed request methods
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization', // Allowed headers
+        },
+    });
+}
+
 Bun.serve({
     port: process.env.PORT || 3000,
     async fetch(req) {
+        // Handle preflight CORS OPTIONS request
+        if (req.method === 'OPTIONS') {
+            return handleOptionsRequest();
+        }
+
         // Handle file upload requests
-        if ((req.method === 'POST' || req.method === 'OPTIONS') && new URL(req.url).pathname === '/upload') {
+        if (req.method === 'POST' && new URL(req.url).pathname === '/upload') {
             return handleFileUpload(req);
         }
 
