@@ -74,7 +74,14 @@ async function handleFileUpload(req) {
         );
     } catch (error) {
         console.log('error', error);
-        return new Response('Something went wrong', { status: 500 });
+        return new Response('Something went wrong', {
+            status: 500,
+            headers: {
+                'Access-Control-Allow-Origin': '*', // Allow all origins
+                'Access-Control-Allow-Methods': 'POST, GET, OPTIONS', // Allowed request methods
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization', // Allowed headers
+            },
+        });
     }
 }
 
